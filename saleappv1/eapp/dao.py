@@ -1,6 +1,7 @@
 from eapp.models import Category, Product, User
-from eapp import app
+from eapp import app, db
 import  hashlib
+from sqlalchemy  import  func
 
 
 
@@ -32,3 +33,11 @@ def authenticate(username, password):
 
 def get_user_by_id(user_id):
     return User.query.get(user_id)
+
+def count_product_by_cate():
+    return (db.session.query(Category.id, Category.name, func.count(Product.id))
+            .join(Product, Product.category_id==Category.id, isouter=True).group_by(Category.id).all())
+
+if __name__ == '__main__':
+    with    app.app_context():
+        print(count_product_by_cate())
