@@ -1,23 +1,21 @@
 {% extends 'layout/base.html' %}
 
-{% block title %}
-    Trang chủ
-{% endblock %}
+{% block title %}Trang chủ{% endblock %}
 
 {% block content %}
-     <h1 class="text text-center text-info mt-2">Đăng nhập </h1>
-    <form action="post">
+    <h1 class="text text-center text-success mt-2">ĐĂNG NHẬP NGƯỜI DÙNG</h1>
+
+    <form method="post">
         <div class="form-floating mb-3 mt-3">
-            <input type="text" class="form-control" id="username" placeholder="Tên đăng nhập" name="username">
-            <label for="username">Tên đăng nhập</label>
+          <input type="text" class="form-control" id="username" placeholder="Tên đăng nhập" name="username" />
+          <label for="username">Tên đăng nhập</label>
         </div>
         <div class="form-floating mb-3 mt-3">
-            <input type="text" class="form-control" id="password" placeholder="Mật khẩu" name="password">
-            <label for="password">mật kẩu</label>
+          <input type="password" class="form-control" id="password" placeholder="Mật khẩu" name="password" />
+          <label for="password">Mật khẩu</label>
         </div>
         <div class="form-floating mb-3 mt-3">
             <button class="btn btn-success">Đăng nhập</button>
         </div>
     </form>
 {% endblock %}
-
