@@ -1,8 +1,11 @@
 import math
+from multiprocessing.spawn import set_executable
 
-from flask import render_template, request, redirect
+from flask import render_template, request, redirect, session
 from flask_login import login_user, logout_user
-from eapp import app, dao, login
+from urllib3.util.wait import select_wait_for_socket
+
+from eapp import app, dao, login, utils
 
 
 @app.route("/")
@@ -58,6 +61,10 @@ def register_process():
 
     return render_template('register.html', err_msg=err_msg)
 
+@app.route('/cart')
+def cart():
+    return render_template('cart.html')
+
 @app.route('/logout')
 def logout_view():
     logout_user()
@@ -65,18 +72,52 @@ def logout_view():
 
 @app.route('/api/carts', methods=['post'])
 def add_to_cart():
-    print(request.json)
-    return {
-        'total_amount':0,
-        'total_quantity':0
-    }
+    cart = session.get('cart')
+    if not cart:
+        cart = {}
+
+    id = str(request.json.get('id'))
+    if id in cart:
+        cart[id]['quantity']+=1
+    else:
+        cart[id] = {
+            'id': id,
+            'name': request.json.get('name'),
+            'price': request.json.get('price'),
+            'quantity': 1
+        }
+    session['cart'] = cart
+    print(cart)
+
+
+    return utils.count_cart(cart)
+
+@app.route('/api/carts/<product_id>', methods=['put'])
+def update_cart(product_id):
+    cart = session.get('cart')
+    if cart and product_id in cart:
+        cart[product_id]['quantity'] = int (request.json.get('quantity',cart[product_id]['quantity']))
+
+        session['cart'] = cart
+    return utils.count_cart(cart)
+
+@app.route('/api/carts/<product_id>', methods=['delete'])
+def delete_cart(product_id):
+    cart = session.get('cart')
+    if cart and product_id in cart:
+        del cart[product_id]
+
+        session['cart'] = cart
+    return utils.count_cart(cart)
+
 
 @app.context_processor
 def common_responses():
     categories = dao.load_categories()
 
     return {
-        'categories': categories
+        'categories': categories,
+        'carts': utils.count_cart(session.get('cart'))
     }
 
 @login.user_loader

@@ -1,0 +1,41 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Đăng nhập{% endblock %}
+
+{% block content %}
+    <h1 class="text text-center text-success mt-2">Giỏ hàng</h1>
+    {% if 'cart' in session %}
+        <table class="table">
+            <tr>
+                <th>ID</th>
+                <th>Tên sản phẩm</th>
+                <th>Số lượng</th>
+                <th>Đơn giá</th>
+                <th></th>
+            </tr>
+            {% for c in session['cart'].values() %}
+            <tr>
+                <td>{{ c.id }}</td>
+                <td>{{ c.name }}</td>
+                <td>
+                    <input type="number" value="{{ c.quantity}}"  onblur="updateCart()" class="form-control"/>
+                </td>
+                <td>{{ "{:,}".format( c.price) }}</td>
+                <td>
+                    <button class="btn-sucess"> &times;</button>
+                </td>
+            </tr>
+            {% endfor%}
+        </table>
+        <div class="alert alert-info">
+            <h4>Tổng tiền: {{ "{:,}".format(carts.total_amount) }} VNĐ</h4>
+            <h4>Tổng số lượng: {{ carts.total_quantity }}</h4>
+        </div>
+
+        <button class="btn btn-success">Thanh Toán</button>
+
+
+    {% else %}
+    <div class="alert alert-warning mt-2" >KHÔNG CÓ SẢN PHẨM NÀO TRONG GIỎ HÀNG</div>
+    {% endif %}
+{% endblock %}
