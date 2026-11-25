@@ -1,8 +1,7 @@
 import math
 
-from flask import render_template, request
-from werkzeug.utils import redirect
-from flask_login import login_user
+from flask import render_template, request, redirect
+from flask_login import login_user, logout_user
 from eapp import app, dao, login
 
 
@@ -24,13 +23,53 @@ def login_process():
     username = request.form.get('username')
     password = request.form.get('password')
     u = dao.authenticate(username=username, password=password)
-    if u :
+    if u:
         login_user(user=u)
+
+    next = request.args.get('next')
+    if next:
+        return redirect(next)
+
     return redirect('/admin')
 
 @app.route('/register')
 def register_view():
-    return render_template('login.html')
+    return render_template('register.html')
+
+@app.route('/register', methods=['post'])
+def register_process():
+    password = request.form.get('password')
+    confirm = request.form.get('confirm')
+
+    err_msg = None
+    if not password or not confirm or password != confirm:
+        err_msg = 'Mật khẩu KHÔNG khớp!'
+    else:
+        data = request.form.copy()
+        del data['confirm']
+
+        avatar = request.files.get('avatar')
+
+        try:
+            dao.add_user(**data,avatar=avatar)
+            return  redirect('/login')
+        except Exception as ex:
+            err_msg = str(ex)
+
+    return render_template('register.html', err_msg=err_msg)
+
+@app.route('/logout')
+def logout_view():
+    logout_user()
+    return redirect('/login')
+
+@app.route('/api/carts', methods=['post'])
+def add_to_cart():
+    print(request.json)
+    return {
+        'total_amount':0,
+        'total_quantity':0
+    }
 
 @app.context_processor
 def common_responses():
@@ -43,6 +82,7 @@ def common_responses():
 @login.user_loader
 def load_user(user_id):
     return dao.get_user_by_id(user_id)
+
 
 if __name__ == '__main__':
     with app.app_context():

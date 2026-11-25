@@ -1,8 +1,8 @@
 from eapp.models import Category, Product, User
 from eapp import app, db
-import  hashlib
-from sqlalchemy  import  func
-
+import hashlib
+from sqlalchemy import func
+import cloudinary.uploader
 
 
 def load_categories():
@@ -38,6 +38,19 @@ def count_product_by_cate():
     return (db.session.query(Category.id, Category.name, func.count(Product.id))
             .join(Product, Product.category_id==Category.id, isouter=True).group_by(Category.id).all())
 
+def add_user(name, username, password,avatar):
+    password = str(hashlib.md5(password.strip().encode('utf-8')).hexdigest())
+
+    u = User(name=name.strip(), username=username.strip(), password=password)
+
+    if avatar:
+        res = cloudinary.uploader.upload(avatar)
+        u.avatar=res['secure_url']
+
+
+    db.session.add(u)
+    db.session.commit()
+
 if __name__ == '__main__':
-    with    app.app_context():
+    with app.app_context():
         print(count_product_by_cate())

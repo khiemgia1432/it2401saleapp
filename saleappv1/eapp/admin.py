@@ -1,16 +1,15 @@
 from flask_admin.contrib.sqla import ModelView
-
 from eapp.models import Category, Product
 from flask_admin import Admin, BaseView, expose, AdminIndexView
-from eapp import app, db,dao
-from flask_login import logout_user,current_user
+from eapp import app, db, dao
+from flask_login import logout_user, current_user
 from eapp.models import UserRoleEnum
 from flask import redirect
 
 class MyAdminIndexView(AdminIndexView):
     @expose('/')
     def index(self):
-
+        # [(1, 'Mobile', 6), (2, 'Tablet', 3), (3, 'Laptop', 0), (4, 'Desktop', 0)]
         return self.render('admin/index.html', stats=dao.count_product_by_cate())
 
 admin = Admin(app=app, name="E-commerce's Admin", index_view=MyAdminIndexView())
@@ -32,11 +31,13 @@ class ProductView(AdminModelView):
     edit_modal = True
     column_editable_list = ['name']
 
+
 class LogoutView(AuthenticatedView):
     @expose('/')
     def index(self):
         logout_user()
         return redirect('/admin')
+
 
 admin.add_view(AdminModelView(Category, db.session))
 admin.add_view(ProductView(Product, db.session))
